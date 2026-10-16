@@ -1,0 +1,36 @@
+{
+  "name": "code-canvas",
+  "private": true,
+  "version": "0.2.0",
+  "productName": "Code Canvas",
+  "author": "Rhythm Sanjeev",
+  "description": "A desktop code editor with a draw-on-code canvas — multi-file projects and runs any language",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "icon": "electron scripts/render-icon.cjs && bash scripts/make-icns.sh",
+    "pack": "electron-vite build && electron-builder --mac --dir",
+    "dist": "electron-vite build && electron-builder --mac"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "monaco-editor": "^0.57.0",
+    "node-pty": "^1.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tldraw": "^5.5.2"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.2.1",
+    "@vitejs/plugin-react": "^6.1.2",
+    "electron": "^44.8.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^6.0.0",
+    "vite": "^8.3.4"
+  }
+}

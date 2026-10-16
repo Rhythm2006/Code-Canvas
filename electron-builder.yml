@@ -1,0 +1,49 @@
+# electron-builder configuration — produces a distributable macOS .dmg.
+# Usage: npm run dist   (build the .dmg)
+#        npm run pack   (unpacked .app in release/, faster for testing)
+
+appId: com.codecanvas.app
+productName: Code Canvas
+
+directories:
+  buildResources: build
+  output: release
+
+# Start from the default file set and exclude the sources/tooling we don't ship.
+# Production node_modules (node-pty, xterm, …) are included automatically.
+files:
+  - '!src/*'
+  - '!scripts/*'
+  - '!build/*'
+  - '!release/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.eslintrc.js,.prettierignore,.prettierrc.yaml}'
+  - '!{.env,.env.*,.npmrc}'
+  - '!{.DS_Store,*.log}'
+
+# node-pty is a native module: its .node binary and spawn-helper must sit outside
+# the asar archive, otherwise the terminal cannot spawn a shell at runtime.
+asarUnpack:
+  - '**/node_modules/node-pty/**'
+
+mac:
+  category: public.app-category.developer-tools
+  icon: build/icon.icns
+  darkModeSupport: true
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  # No Apple Developer certificate is available on this machine, so skip code
+  # signing to keep local builds working. Remove this once you have an identity.
+  identity: null
+
+dmg:
+  title: Code Canvas
+  contents:
+    - x: 140
+      y: 200
+    - x: 420
+      y: 200
+      type: link
+      path: /Applications

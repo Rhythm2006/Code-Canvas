@@ -1,0 +1,11 @@
+node_modules
+out
+dist
+release
+.DS_Store
+*.local
+*.log
+
+# generated while building the app icon
+build/icon.iconset/
+build/icon-preview.png

@@ -1,0 +1,864 @@
+/* ==========================================================================
+   Code Canvas — dark macOS-flavoured theme
+   Tokens live in index.css. Surfaces are opaque for content (editor, terminal)
+   and translucent for chrome (toolbar, sidebar) so native vibrancy shows.
+   ========================================================================== */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* --- toolbar (also the window drag region) -------------------------------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--toolbar-h);
+  padding: 0 12px 0 78px; /* left inset clears the traffic lights */
+  background: transparent;
+  border-bottom: 1px solid var(--separator);
+  -webkit-app-region: drag;
+  user-select: none;
+  z-index: 10;
+  flex: 0 0 auto;
+}
+
+.toolbar button,
+.toolbar input,
+.toolbar .segmented,
+.toolbar .dropdown {
+  -webkit-app-region: no-drag;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0;
+}
+
+.project-name {
+  color: var(--text-3);
+  font-size: 12px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar button {
+  height: var(--control-h);
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-control);
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.toolbar button:hover:not(:disabled) {
+  background: var(--bg-control-hover);
+}
+
+.toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* primary action — filled graphite */
+.toolbar .btn-primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #12141a;
+  font-weight: 600;
+}
+
+.toolbar .btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+/* secondary — quiet outline */
+.toolbar .btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-2);
+}
+
+.toolbar .btn-ghost:hover:not(:disabled) {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+/* destructive — red tint */
+.toolbar .btn-danger {
+  background: var(--danger-fill);
+  border-color: transparent;
+  color: #ff8b82;
+}
+
+.toolbar .btn-danger:hover:not(:disabled) {
+  background: rgba(255, 69, 58, 0.26);
+  color: #ffa39c;
+}
+
+.run-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --- segmented control (Code | Draw) -------------------------------------- */
+.toolbar .segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--bg-control);
+  border: 1px solid var(--separator);
+}
+
+.toolbar .segmented button {
+  height: 20px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.toolbar .segmented button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text);
+}
+
+.toolbar .segmented button.on {
+  background: var(--bg-control-active);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* --- export dropdown ------------------------------------------------------ */
+.dropdown {
+  position: relative;
+}
+
+.toolbar .dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 1500;
+  min-width: 250px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+}
+
+.toolbar .dropdown-menu button {
+  display: block;
+  width: 100%;
+  height: auto;
+  text-align: left;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.toolbar .dropdown-menu button:hover:not(:disabled) {
+  background: var(--accent-fill);
+}
+
+.toolbar .dropdown-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* --- body ----------------------------------------------------------------- */
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* --- sidebar -------------------------------------------------------------- */
+.sidebar {
+  width: 232px;
+  flex: 0 0 auto;
+  background: transparent; /* vibrancy */
+  border-right: 1px solid var(--separator);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px 6px 14px;
+  flex: 0 0 auto;
+}
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.sidebar-actions button {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sidebar-actions button:hover {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+.file-tree {
+  flex: 1;
+  overflow: auto;
+  padding: 2px 6px 10px;
+  font-size: 13px;
+  min-height: 60px;
+  user-select: none;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.tree-row:hover {
+  background: var(--bg-control);
+}
+
+.tree-row:focus {
+  outline: none;
+  background: var(--accent-fill);
+  color: var(--text);
+}
+
+.tree-icon {
+  width: 12px;
+  color: var(--text-3);
+  font-size: 10px;
+  flex: 0 0 auto;
+}
+
+.tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-pencil {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--dirty);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.toolchains {
+  padding: 8px 14px;
+  font-size: 10.5px;
+  color: var(--text-3);
+  border-top: 1px solid var(--separator);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--text-3);
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+/* --- main column ---------------------------------------------------------- */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-content);
+}
+
+/* --- tabs ----------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  background: var(--bg-content);
+  border-bottom: 1px solid var(--separator);
+  flex: 0 0 auto;
+}
+
+.tabs-strip {
+  display: flex;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.tabs-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  flex: 0 0 auto;
+}
+
+.tabs-actions button {
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabs-actions button:hover:not(:disabled) {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+.tabs-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  color: var(--text-3);
+  border-right: 1px solid var(--separator);
+  cursor: default;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-2);
+}
+
+.tab.active {
+  background: var(--bg-panel);
+  color: var(--text);
+}
+
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  flex: 0 0 auto;
+}
+
+.tab-dot.on {
+  background: var(--dirty);
+}
+
+.tab-close {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0;
+}
+
+.tab-close:hover {
+  color: var(--text);
+}
+
+/* --- shared surface (editor + drawing overlay) ---------------------------- */
+.workspace {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  background: var(--bg-content);
+  font-size: 13px;
+}
+
+/* --- welcome screen (no project open) ------------------------------------- */
+.welcome {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-content);
+}
+
+.welcome-inner {
+  width: 460px;
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.welcome-mark {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.welcome-tag {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
+  max-width: 40ch;
+}
+
+.welcome-tag kbd {
+  display: inline-block;
+  min-width: 17px;
+  margin: 0 1px;
+  padding: 1px 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-control);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.welcome-open {
+  margin-top: 20px;
+  height: 30px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #12141a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.welcome-open:hover {
+  background: var(--accent-hover);
+}
+
+.welcome-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.welcome-recent {
+  margin-top: 22px;
+  width: 100%;
+  border-top: 1px solid var(--separator);
+  padding-top: 10px;
+}
+
+.welcome-recent-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.recent-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.recent-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recent-open:hover {
+  background: var(--accent-fill);
+}
+
+.recent-name {
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.recent-path {
+  font-size: 10.5px;
+  color: var(--text-3);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-forget {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.recent-row:hover .recent-forget {
+  opacity: 1;
+}
+
+.recent-forget:hover {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+.canvas-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+/* Let the code show through the drawing surface. */
+.canvas-wrap .tl-background,
+.canvas-wrap .tl-background__wrapper {
+  background-color: transparent !important;
+}
+
+.canvas-wrap .tl-grid {
+  display: none;
+}
+
+/* Blend tldraw's dark UI with our palette. */
+.canvas-wrap .tl-theme__dark {
+  --tl-color-panel: #262628;
+  --tl-color-panel-contrast: rgba(255, 255, 255, 0.1);
+  --tl-color-divider: rgba(255, 255, 255, 0.08);
+  --tl-color-selected: #8b94a3;
+  --tl-color-selection-stroke: #8b94a3;
+  --tl-color-selection-fill: rgba(139, 148, 163, 0.2);
+  --tl-color-focus: #a3abb8;
+}
+
+.canvas-wrap .tlui-layout__bottom {
+  padding-bottom: 14px;
+}
+
+/* Only the active layer receives pointer events. */
+.mode-code .canvas-wrap {
+  pointer-events: none;
+}
+
+.mode-draw .editor-layer {
+  pointer-events: none;
+}
+
+/* --- terminal + resizer --------------------------------------------------- */
+.resizer {
+  flex: 0 0 auto;
+  height: 5px;
+  cursor: row-resize;
+  background: transparent;
+}
+
+.resizer:hover,
+.resizer:active {
+  background: var(--accent-fill);
+}
+
+.terminal {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--separator);
+  background: var(--bg-content);
+  color: var(--text);
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--bg-panel);
+  color: var(--text-3);
+  flex: 0 0 auto;
+}
+
+.terminal-hint {
+  font-weight: 400;
+  color: var(--text-3);
+  font-size: 10.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terminal-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.terminal-actions button {
+  padding: 2px 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.terminal-actions button:hover {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+.terminal-host {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 6px;
+}
+
+.terminal-host .xterm {
+  height: 100%;
+}
+
+.terminal-host .xterm-viewport {
+  background-color: transparent !important;
+}
+
+/* --- explorer context menu ------------------------------------------------ */
+.ctx-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 180px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ctx-header {
+  padding: 5px 9px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--separator);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctx-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 9px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.ctx-item:hover {
+  background: var(--accent-fill);
+}
+
+.ctx-item.danger {
+  color: #ff8b82;
+}
+
+.ctx-item.danger:hover {
+  background: var(--danger-fill);
+  color: #ffa39c;
+}
+
+/* --- modal dialog --------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.modal {
+  width: 380px;
+  max-width: 90vw;
+  padding: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  color: var(--text);
+}
+
+.modal-title {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.modal-message {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+.modal-input {
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-fill);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modal-actions button {
+  height: 28px;
+  padding: 0 14px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.modal-actions .btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-2);
+}
+
+.modal-actions .btn-ghost:hover {
+  background: var(--bg-control);
+  color: var(--text);
+}
+
+.modal-actions .btn-primary {
+  background: var(--accent);
+  color: #12141a;
+  font-weight: 600;
+}
+
+.modal-actions .btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.modal-actions .btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.modal-actions .btn-danger:hover:not(:disabled) {
+  background: #ff5f55;
+}
