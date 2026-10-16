@@ -882,7 +882,13 @@ export default function App() {
 
           <div className={`workspace mode-${mode}`}>
             <div className="editor-layer">
-              {!root ? (
+              {!sessionReady ? (
+                // First paint happens before the saved session (last folder +
+                // open files) has been restored. Show a neutral pane instead
+                // of flashing Welcome, which would be swapped out a moment
+                // later by the restored project.
+                <div className="placeholder" aria-hidden="true" />
+              ) : !root ? (
                 <Welcome
                   recents={recents}
                   onOpenFolder={openFolder}
