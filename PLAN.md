@@ -41,7 +41,7 @@ never accept typed input. Those turned out to *be* the product.
 - **electron-vite 6 + Vite 8** — main / preload / renderer builds
 - **React 19** — UI
 - **Monaco Editor** (`@monaco-editor/react`) — the code editor
-- **tldraw 5** — the drawing canvas
+- **Excalidraw** (MIT) — the drawing canvas, with self-hosted fonts
 - **@xterm/xterm + node-pty** — the terminal
 - **electron-builder** — macOS `.dmg`
 
@@ -68,8 +68,9 @@ resolves a toolchain and composes a command → the command is *typed into the
 shell* → output streams back over `pty:data` → xterm renders it. Because the run
 happens in a live shell, the user can type back at any prompt.
 
-**Data flow for a drawing:** tldraw store event → snapshot for the active file
-→ debounced write to `<project>/.sketch/drawings.json` (one sidecar per project).
+**Data flow for a drawing:** Excalidraw `onChange` → the scene is held in memory
+for the active file → debounced serialization to
+`<project>/.sketch/drawings.json` (one sidecar per project).
 
 ---
 
@@ -91,11 +92,17 @@ happens in a live shell, the user can type back at any prompt.
 
 ### Project drawings — `<project>/.sketch/drawings.json`
 
-A map of absolute file path → tldraw snapshot:
+A map of absolute file path → that file's serialized Excalidraw scene:
 
 ```json
 {
-  "/Users/you/projects/algorithms/main.py": { "document": { "store": {} }, "session": {} }
+  "/Users/you/projects/algorithms/main.py": {
+    "type": "excalidraw",
+    "version": 2,
+    "elements": [],
+    "appState": { "viewBackgroundColor": "transparent" },
+    "files": {}
+  }
 }
 ```
 

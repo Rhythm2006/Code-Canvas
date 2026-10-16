@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Code Canvas</title>
+    <script>
+      // Where Excalidraw fetches its fonts/locales from at runtime. A full absolute
+      // URL is required so this resolves identically on the dev server
+      // (http://localhost:5173/) and in the packaged app (file:///…/out/renderer/).
+      window.EXCALIDRAW_ASSET_PATH = new URL('excalidraw/', document.baseURI).href
+    </script>
   </head>
   <body>
     <div id="root"></div>

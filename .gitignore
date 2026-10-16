@@ -9,3 +9,6 @@ release
 # generated while building the app icon
 build/icon.iconset/
 build/icon-preview.png
+
+# copied out of node_modules by scripts/sync-excalidraw-assets.cjs on dev/build
+src/renderer/public/excalidraw/

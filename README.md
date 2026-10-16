@@ -29,7 +29,7 @@ It is a real editor, too: multi-file projects with a file tree, a genuine shell 
 
 ## Features
 
-- **Draw on your code.** A transparent [tldraw](https://tldraw.dev/) canvas sits over the [Monaco](https://microsoft.github.io/monaco-editor/) editor. One key flips which layer receives input.
+- **Draw on your code.** A transparent [Excalidraw](https://excalidraw.com/) canvas sits over the [Monaco](https://microsoft.github.io/monaco-editor/) editor. One key flips which layer receives input. No license key and no watermark — the drawing engine is MIT.
 - **Multi-file projects.** A real file tree — create files and folders, rename, and delete to the Trash. Tabs, unsaved-change dots, and *Save all / Close all*.
 - **A real terminal.** The output panel is an [xterm.js](https://xtermjs.org/) terminal backed by a genuine login shell ([node-pty](https://github.com/microsoft/node-pty)). **Run** types your command into that shell, and you can type back to answer `input()` prompts — real stdin, not a mock.
 - **Runs many languages** using toolchains already on your `PATH` — Python, Node/JavaScript, Ruby, PHP, Go, C, C++, Rust, and Java. Compiled languages build to a temp binary and run.
@@ -48,7 +48,7 @@ It is a real editor, too: multi-file projects with a file tree, a genuine shell 
 | Build | electron-vite 6 + Vite 8 |
 | UI | React 19 |
 | Editor | Monaco Editor (`@monaco-editor/react`) |
-| Canvas | tldraw 5 |
+| Canvas | Excalidraw (MIT) |
 | Terminal | `@xterm/xterm` + node-pty |
 | Packaging | electron-builder (`.dmg`) |
 
@@ -147,7 +147,7 @@ code-canvas/
                 ├── FileTree.jsx     # tree + context menu + keyboard nav
                 ├── Tabs.jsx
                 ├── MonacoPane.jsx
-                ├── DrawCanvas.jsx   # tldraw wrapper
+                ├── DrawCanvas.jsx   # Excalidraw wrapper (self-hosted fonts)
                 ├── Terminal.jsx     # xterm
                 ├── Welcome.jsx      # empty state + recent projects
                 └── Dialog.jsx       # modal prompts/confirms
@@ -157,14 +157,16 @@ code-canvas/
 
 ## How it works
 
-**One surface, two layers.** The editor fills the workspace and the tldraw canvas is absolutely positioned above it with a transparent background. A `mode-code` / `mode-draw` class decides which layer receives pointer events:
+**One surface, two layers.** The editor fills the workspace and the Excalidraw canvas is absolutely positioned above it. The scene background is seeded transparent (`viewBackgroundColor: 'transparent'`) so the code stays readable through the strokes. A `mode-code` / `mode-draw` class decides which layer receives pointer events:
 
 ```css
 .mode-code .canvas-wrap  { pointer-events: none; } /* draw layer is inert */
 .mode-draw .editor-layer { pointer-events: none; } /* editor is inert */
 ```
 
-**Drawing persistence.** Each project keeps one sidecar file, `<project>/.sketch/drawings.json`, mapping a file path to its tldraw snapshot. It's written on a short debounce as you draw, and the `.sketch` folder is hidden from the Explorer. Because the sidecar lives inside the project, drawings are versioned and shared along with the code.
+**Drawing persistence.** Each project keeps one sidecar file, `<project>/.sketch/drawings.json`, mapping a file path to that file's serialized Excalidraw scene. It's written on a short debounce as you draw, and the `.sketch` folder is hidden from the Explorer. Because the sidecar lives inside the project, drawings are versioned and shared along with the code.
+
+**Fonts ship with the app.** Excalidraw normally fetches its drawing fonts from a CDN at runtime, which a desktop build must not depend on. `scripts/sync-excalidraw-assets.cjs` copies the fonts and locale bundles out of `node_modules` into the renderer's public folder on every `dev`/`build`, and `window.EXCALIDRAW_ASSET_PATH` points at them — so text renders identically offline.
 
 **The terminal is a real shell.** A single persistent PTY (`id: main`) runs your login shell at the project root. **Run** resolves a toolchain, prints a labelled divider, and *types* the command into that shell — so prompts, `stdin`, colours, and `Ctrl+C` all behave exactly as they do in Terminal.app. Starting a program that reads input is the normal case, not a special one.
 
@@ -200,4 +202,6 @@ code-canvas/
 
 ## License
 
-Choose one and add a `LICENSE` file (MIT and Apache-2.0 are common for projects like this). Until then, all rights reserved by the author.
+Project license: choose one and add a `LICENSE` file (MIT and Apache-2.0 are both common for a project like this). Until then, all rights reserved by the author.
+
+The drawing engine, [Excalidraw](https://github.com/excalidraw/excalidraw), is MIT-licensed — so the app needs **no license key, no trial, and shows no watermark**. Its drawing fonts are shipped unmodified with the package under their own upstream licenses.

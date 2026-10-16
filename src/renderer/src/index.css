@@ -1,6 +1,6 @@
 /* --- design tokens --------------------------------------------------------
    One dark palette (macOS-derived) shared by the app UI, Monaco, xterm and
-   tldraw so every surface reads as a single, deliberate app. */
+   Excalidraw so every surface reads as a single, deliberate app. */
 
 :root {
   color-scheme: dark;

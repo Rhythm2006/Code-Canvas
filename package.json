@@ -7,23 +7,26 @@
   "description": "A desktop code editor with a draw-on-code canvas — multi-file projects and runs any language",
   "main": "./out/main/index.js",
   "scripts": {
+    "sync:assets": "node scripts/sync-excalidraw-assets.cjs",
+    "predev": "npm run sync:assets",
     "dev": "electron-vite dev",
+    "prebuild": "npm run sync:assets",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "rebuild": "electron-rebuild -f -w node-pty",
     "icon": "electron scripts/render-icon.cjs && bash scripts/make-icns.sh",
-    "pack": "electron-vite build && electron-builder --mac --dir",
-    "dist": "electron-vite build && electron-builder --mac"
+    "pack": "npm run build && electron-builder --mac --dir",
+    "dist": "npm run build && electron-builder --mac"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.18.1",
     "@monaco-editor/react": "^4.7.0",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
     "monaco-editor": "^0.57.0",
     "node-pty": "^1.1.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "tldraw": "^5.5.2"
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@electron/rebuild": "^4.2.1",

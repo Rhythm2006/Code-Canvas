@@ -2,22 +2,22 @@ import { useEffect, useRef, useState } from 'react'
 import FileTree from './components/FileTree'
 import Tabs from './components/Tabs'
 import MonacoPane from './components/MonacoPane'
-import DrawCanvas from './components/DrawCanvas'
+import DrawCanvas, { CANVAS_STROKE } from './components/DrawCanvas'
 import Terminal from './components/Terminal'
 import Dialog from './components/Dialog'
 import Welcome from './components/Welcome'
+import { exportToBlob, exportToSvg, restore, serializeAsJSON } from '@excalidraw/excalidraw'
 import './App.css'
 
 const SIDECAR = '/.sketch/drawings.json'
 const PTY_ID = 'main'
 const nameOf = (p) => p.split('/').pop()
 
-// Does a saved tldraw snapshot actually contain any shapes?
-const snapshotHasShapes = (snap) => {
-  const store = snap?.document?.store
-  if (!store) return false
-  return Object.values(store).some((r) => r && r.typeName === 'shape')
-}
+// Does a saved Excalidraw scene actually contain any shapes? Entries written by
+// the earlier tldraw-based version have no `elements` array, so they are ignored
+// rather than rendered as garbage.
+const sceneHasElements = (scene) =>
+  Array.isArray(scene?.elements) && scene.elements.some((el) => !el.isDeleted)
 
 export default function App() {
   const [root, setRoot] = useState(null)
@@ -33,12 +33,15 @@ export default function App() {
   const [drawingPaths, setDrawingPaths] = useState(() => new Set())
   const [exportOpen, setExportOpen] = useState(false)
   const [recents, setRecents] = useState([])
+  const [canvasReady, setCanvasReady] = useState(false)
 
-  const tldrawRef = useRef(null)
+  const canvasRef = useRef(null) // Excalidraw imperative API
+  const canvasWrapRef = useRef(null)
   const monacoRef = useRef(null)
-  const drawingsRef = useRef({}) // { [filePath]: tldraw snapshot }
+  const drawingsRef = useRef({}) // { [filePath]: serialized Excalidraw scene }
   const prevPathRef = useRef(null)
-  const suppressCanvasRef = useRef(false)
+  const latestSceneRef = useRef(null) // scene as last reported by Excalidraw
+  const suppressCanvasUntilRef = useRef(0) // ignore programmatic onChange until this time
   const rootRef = useRef(null)
   const activePathRef = useRef(null)
   const saveTimerRef = useRef(null)
@@ -68,14 +71,53 @@ export default function App() {
   }
 
   // --- drawing persistence --------------------------------------------------
+  // Excalidraw hands us the scene on every change. We hold on to those
+  // references (cheap) and only serialize at save time, so what gets persisted is
+  // exactly what the user last edited — never a re-read of the canvas at some
+  // later moment, which is how a momentarily-empty canvas could clobber a good
+  // sketch.
+  const captureScene = (path) => {
+    const latest = latestSceneRef.current
+    if (!latest || latest.path !== path) return
+    if (!latest.elements.some((el) => !el.isDeleted)) {
+      // Nothing drawn on this file. Drop our own now-empty scene, but leave a
+      // legacy tldraw entry alone rather than silently destroying the old sketch.
+      if (!drawingsRef.current[path] || Array.isArray(drawingsRef.current[path]?.elements)) {
+        delete drawingsRef.current[path]
+      }
+      return
+    }
+    drawingsRef.current[path] = JSON.parse(
+      // Positional signature; 'local' embeds any inserted images so the sidecar
+      // stays self-contained.
+      serializeAsJSON(latest.elements, latest.appState, latest.files, 'local')
+    )
+  }
+
   const scheduleSaveDrawings = () => {
     if (!rootRef.current) return
     clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => {
+      captureScene(activePathRef.current)
       window.api
         .writeFile(rootRef.current + SIDECAR, JSON.stringify(drawingsRef.current))
         .catch(() => {})
     }, 800)
+  }
+
+  // Fires on every scene change, including mid-drag, so it stays cheap: stash the
+  // scene, toggle the Explorer's pencil marker, debounce a save.
+  const handleCanvasChange = (elements, appState, files) => {
+    // Excalidraw also reports the programmatic updateScene() we issue when loading
+    // a file. Those aren't user edits, and they arrive *after* the call returns —
+    // so a time window, rather than a flag flipped around the call, is what
+    // reliably ignores them.
+    if (performance.now() < suppressCanvasUntilRef.current) return
+    const path = activePathRef.current
+    if (!path) return
+    latestSceneRef.current = { path, elements, appState, files }
+    updateDrawingPath(path, elements.some((el) => !el.isDeleted))
+    scheduleSaveDrawings()
   }
 
   // --- project --------------------------------------------------------------
@@ -96,8 +138,8 @@ export default function App() {
 
     // Rebuild the "has a sketch" set from the sidecar.
     const hasDrawings = new Set()
-    for (const [p, snap] of Object.entries(drawingsRef.current)) {
-      if (snapshotHasShapes(snap)) hasDrawings.add(p)
+    for (const [p, scene] of Object.entries(drawingsRef.current)) {
+      if (sceneHasElements(scene)) hasDrawings.add(p)
     }
     setDrawingPaths(hasDrawings)
 
@@ -497,13 +539,17 @@ export default function App() {
       danger: true,
       onConfirm: () => {
         setDialog(null)
-        const editor = tldrawRef.current
-        if (editor) {
-          suppressCanvasRef.current = true
-          const ids = [...editor.getCurrentPageShapeIds()]
-          if (ids.length) editor.deleteShapes(ids)
-          suppressCanvasRef.current = false
+        const api = canvasRef.current
+        if (api) {
+          suppressCanvasUntilRef.current = performance.now() + 300
+          api.updateScene({
+            elements: [],
+            appState: { viewBackgroundColor: 'transparent' },
+            files: {},
+          })
+          api.history.clear()
         }
+        latestSceneRef.current = null
         delete drawingsRef.current[activePath]
         updateDrawingPath(activePath, false)
         scheduleSaveDrawings()
@@ -532,31 +578,41 @@ export default function App() {
   }
 
   const exportDrawing = async (format) => {
-    const editor = tldrawRef.current
-    if (!editor) return
-    const ids = [...editor.getCurrentPageShapeIds()]
-    if (!ids.length) {
+    const api = canvasRef.current
+    if (!api) return
+    const elements = api.getSceneElements()
+    if (!elements.some((el) => !el.isDeleted)) {
       showError('Nothing to export', 'The current file has no drawing yet.')
       return
     }
     const base = nameOf(activePath || 'drawing').replace(/\.[^.]+$/, '') || 'drawing'
-    const opts = { background: false, padding: 'auto', darkMode: true }
+    // Export the strokes alone — no scene background — so the result drops cleanly
+    // onto slides and handouts.
+    const opts = {
+      elements,
+      appState: { ...api.getAppState(), exportBackground: false, exportWithDarkMode: true },
+      files: api.getFiles(),
+    }
     try {
       if (format === 'svg') {
-        const res = await editor.getSvgString(ids, opts)
-        if (!res?.svg) return
+        const svg = await exportToSvg(opts)
         await window.api.exportSaveAs({
           defaultName: `${base}.svg`,
           filters: [{ name: 'SVG image', extensions: ['svg'] }],
-          content: res.svg,
+          content: new XMLSerializer().serializeToString(svg),
         })
       } else {
-        const res = await editor.toImageDataUrl(ids, { ...opts, format: 'png', pixelRatio: 2 })
-        if (!res?.url) return
+        const blob = await exportToBlob({ ...opts, mimeType: 'image/png', quality: 1 })
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result).split(',')[1])
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
         await window.api.exportSaveAs({
           defaultName: `${base}.png`,
           filters: [{ name: 'PNG image', extensions: ['png'] }],
-          content: res.url.split(',')[1],
+          content: base64,
           base64: true,
         })
       }
@@ -577,14 +633,16 @@ export default function App() {
   const toggleMode = () => setMode((m) => (m === 'code' ? 'draw' : 'code'))
 
   // --- focus management -----------------------------------------------------
-  // tldraw's letter hotkeys only fire while its container is focused, so in code
-  // mode we keep focus on Monaco; in draw mode we hand focus to the canvas.
+  // Excalidraw's tool hotkeys only fire while its own container has focus, so in
+  // code mode we keep focus on Monaco; in draw mode we hand it to the canvas.
+  const canvasContainer = () => canvasWrapRef.current?.querySelector('.excalidraw') ?? null
+
   useEffect(() => {
-    const editor = tldrawRef.current
     if (mode === 'draw') {
-      editor?.getContainer?.().focus()
+      canvasContainer()?.focus?.()
     } else {
-      editor?.getContainer?.().blur()
+      const active = document.activeElement
+      if (active && canvasWrapRef.current?.contains(active)) active.blur?.()
       monacoRef.current?.focus()
     }
   }, [mode, activePath])
@@ -594,9 +652,8 @@ export default function App() {
   useEffect(() => {
     if (mode !== 'code') return
     const onFocusIn = (e) => {
-      const container = tldrawRef.current?.getContainer?.()
-      if (container && container.contains(e.target)) {
-        container.blur()
+      if (canvasWrapRef.current?.contains(e.target)) {
+        e.target.blur?.()
         monacoRef.current?.focus()
       }
     }
@@ -620,26 +677,43 @@ export default function App() {
 
   // --- swap drawings when the active file changes ---------------------------
   useEffect(() => {
-    const editor = tldrawRef.current
-    if (!editor) return
+    const api = canvasRef.current
+    if (!api) return
 
+    // Park the outgoing file's strokes back in memory before loading the next one.
     if (prevPathRef.current) {
-      const snap = editor.getSnapshot()
-      drawingsRef.current[prevPathRef.current] = snap
-      updateDrawingPath(prevPathRef.current, snapshotHasShapes(snap))
+      captureScene(prevPathRef.current)
+      updateDrawingPath(
+        prevPathRef.current,
+        sceneHasElements(drawingsRef.current[prevPathRef.current])
+      )
     }
 
-    suppressCanvasRef.current = true
-    const snap = activePath ? drawingsRef.current[activePath] : null
-    if (snap) {
-      editor.loadSnapshot(snap)
-    } else {
-      const ids = [...editor.getCurrentPageShapeIds()]
-      if (ids.length) editor.deleteShapes(ids)
+    suppressCanvasUntilRef.current = performance.now() + 300
+    const scene = activePath ? drawingsRef.current[activePath] : null
+    let restored = null
+    if (scene) {
+      try {
+        restored = restore(scene, null, null)
+      } catch {
+        restored = null
+      }
     }
-    suppressCanvasRef.current = false
+    api.updateScene({
+      elements: restored?.elements ?? [],
+      appState: {
+        ...(restored?.appState ?? {}),
+        // A saved scene must never reintroduce an opaque background.
+        viewBackgroundColor: 'transparent',
+        currentItemStrokeColor: CANVAS_STROKE,
+      },
+      files: restored?.files ?? {},
+    })
+    // Undo shouldn't reach back across files.
+    api.history.clear()
     prevPathRef.current = activePath
-  }, [activePath])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePath, canvasReady])
 
   // --- output resize --------------------------------------------------------
   const startResize = (e) => {
@@ -830,26 +904,14 @@ export default function App() {
               )}
             </div>
 
-            <div className="canvas-wrap">
+            <div className="canvas-wrap" ref={canvasWrapRef}>
               <DrawCanvas
-                hideUi={mode === 'code'}
-                onMount={(editor) => {
-                  tldrawRef.current = editor
-
-                  const unlisten = editor.store.listen(
-                    () => {
-                      if (suppressCanvasRef.current) return
-                      if (activePathRef.current) {
-                        const snap = editor.getSnapshot()
-                        drawingsRef.current[activePathRef.current] = snap
-                        updateDrawingPath(activePathRef.current, snapshotHasShapes(snap))
-                      }
-                      scheduleSaveDrawings()
-                    },
-                    { source: 'user', scope: 'document' }
-                  )
-                  return () => unlisten()
+                chromeHidden={mode === 'code'}
+                onReady={(api) => {
+                  canvasRef.current = api
+                  setCanvasReady(true)
                 }}
+                onChange={handleCanvasChange}
               />
             </div>
           </div>

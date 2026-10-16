@@ -9,17 +9,18 @@ directories:
   buildResources: build
   output: release
 
-# Start from the default file set and exclude the sources/tooling we don't ship.
-# Production node_modules (node-pty, xterm, …) are included automatically.
+# Strict allowlist. Main, preload and renderer are all bundled by Vite into
+# out/, so shipping node_modules would only duplicate ~300 MB of libraries
+# (mermaid, d3, katex, monaco, …) that already live inside the renderer bundle.
+# node-pty is the one exception: it is a native module that main loads at
+# runtime, so its files ship as-is (and are unpacked, see asarUnpack below).
 files:
-  - '!src/*'
-  - '!scripts/*'
-  - '!build/*'
-  - '!release/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.eslintrc.js,.prettierignore,.prettierrc.yaml}'
-  - '!{.env,.env.*,.npmrc}'
-  - '!{.DS_Store,*.log}'
+  - '!**/*'
+  - 'out/**'
+  - 'node_modules/node-pty/**'
+  - '!node_modules/node-pty/prebuilds/win32-*/**'
+  - '!node_modules/node-pty/prebuilds/darwin-x64/**'
+  - 'package.json'
 
 # node-pty is a native module: its .node binary and spawn-helper must sit outside
 # the asar archive, otherwise the terminal cannot spawn a shell at runtime.
