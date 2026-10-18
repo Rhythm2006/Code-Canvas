@@ -174,11 +174,20 @@ All six refinement phases are complete.
 
 ```bash
 npm run pack   # unpacked .app in release/  (fast smoke test)
-npm run dist   # release/Code Canvas-0.2.0-arm64.dmg
+npm run dist   # release/Code Canvas-<version>-arm64.dmg
+npm run checksums   # release/SHA256SUMS.txt for the built artifacts
 ```
 
 Key config choices in `electron-builder.yml`:
 
+- `files` — a strict allowlist: main, preload and renderer are all bundled by
+  Vite into `out/`, so only `node-pty` ships from `node_modules`. Without it,
+  electron-builder copies ~300 MB of libraries already inside the renderer
+  bundle.
+- `dmg.background` — the Finder window art, rendered as vector by
+  `npm run dmg:art` at 1x and 2x. electron-builder pairs the two files through
+  `tiffutil -cathidpicheck`, so the window is retina-correct. `dmg.window` and
+  `dmg.contents` must line up with that artwork.
 - `asarUnpack: **/node_modules/node-pty/**` — a native module cannot be spawned
   from inside an asar archive.
 - `mac.identity: null` — no signing certificate is available. On another Mac the
@@ -223,10 +232,15 @@ code-canvas/
 ├── package.json
 ├── build/
 │   ├── icon.png               ← master icon (rendered from SVG)
-│   └── icon.icns
+│   ├── icon.icns
+│   ├── dmg-background.png     ← .dmg window art (1x)
+│   └── dmg-background@2x.png  ← .dmg window art (2x)
 ├── scripts/
 │   ├── render-icon.cjs        ← SVG → PNG, via Electron
-│   └── make-icns.sh           ← PNG → .icns, via sips + iconutil
+│   ├── render-dmg-background.cjs ← .dmg window art, 1x + 2x
+│   ├── make-icns.sh           ← PNG → .icns, via sips + iconutil
+│   ├── sync-excalidraw-assets.cjs ← self-hosts Excalidraw fonts/locales
+│   └── checksums.cjs          ← SHA-256 for the release artifacts
 └── src/
     ├── main/index.js          ← window, menu, FS + export IPC, toolchains, PTY
     ├── preload/index.js       ← window.api bridge
