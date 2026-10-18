@@ -41,6 +41,10 @@ mac:
 
 dmg:
   title: Code Canvas
+  # No spaces in the artifact name: GitHub replaces spaces with "." in release
+  # asset names, which would stop `shasum -c SHA256SUMS.txt` from matching the
+  # downloaded file.
+  artifactName: 'Code-Canvas-${version}-${arch}.dmg'
   # Rendered by `npm run dmg:art`. electron-builder finds the @2x sibling and
   # hands both to `tiffutil -cathidpicheck`, so the window art is retina-crisp.
   # The coordinates below are what that artwork's arrow points between.

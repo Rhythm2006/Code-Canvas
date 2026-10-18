@@ -66,7 +66,7 @@ It is a real editor, too: multi-file projects with a file tree, a genuine shell 
 
 ## Install
 
-Grab the latest `Code Canvas-<version>-arm64.dmg` from the project's Releases
+Grab the latest `Code-Canvas-<version>-arm64.dmg` from the project's Releases
 page, open it, and drag **Code Canvas** into **Applications** — then launch it.
 
 The build is **not code-signed** (no Apple Developer certificate is configured),
@@ -118,7 +118,7 @@ npm run dev
 After `npm run dist` you'll find the installer and its checksums at:
 
 ```
-release/Code Canvas-<version>-arm64.dmg
+release/Code-Canvas-<version>-arm64.dmg
 release/SHA256SUMS.txt
 ```
 

@@ -174,7 +174,7 @@ All six refinement phases are complete.
 
 ```bash
 npm run pack   # unpacked .app in release/  (fast smoke test)
-npm run dist   # release/Code Canvas-<version>-arm64.dmg
+npm run dist   # release/Code-Canvas-<version>-arm64.dmg
 npm run checksums   # release/SHA256SUMS.txt for the built artifacts
 ```
 
