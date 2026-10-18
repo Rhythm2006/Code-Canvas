@@ -8,6 +8,8 @@ Code Canvas is a learning and teaching tool that lives on your machine. The edit
 
 It is a real editor, too: multi-file projects with a file tree, a genuine shell in the output panel that accepts program input, and a runner that compiles and executes **many languages** using the toolchains already installed on your computer.
 
+**[code-canvas-website](https://rhythm2006.github.io/code-canvas-website/)** — the landing page, with the download, install steps and checksums.
+
 ```
 ┌───────────────────────────────────────────────────────────┐
 │  Code Canvas        [ Code | Draw ]        Save   Run      │
