@@ -291,8 +291,13 @@ export default function App() {
       const neighbour = next[Math.min(idx, next.length - 1)]
       setActivePath(neighbour ? neighbour.path : null)
     }
-    delete drawingsRef.current[path]
+    // Closing a tab is a view action, not a delete: the sketch belongs to the
+    // file and lives in the sidecar, so it has to survive. Persist the outgoing
+    // file's strokes first (captureScene still drops our own scene if the file
+    // genuinely has no strokes left).
+    captureScene(path)
     scheduleSaveDrawings()
+    updateDrawingPath(path, sceneHasElements(drawingsRef.current[path]))
   }
 
   const closeTab = (path) => {

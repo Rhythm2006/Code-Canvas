@@ -64,7 +64,30 @@ It is a real editor, too: multi-file projects with a file tree, a genuine shell 
 
 ---
 
-## Getting started
+## Install
+
+Grab the latest `Code Canvas-<version>-arm64.dmg` from the project's Releases
+page, open it, and drag **Code Canvas** into **Applications** — then launch it.
+
+The build is **not code-signed** (no Apple Developer certificate is configured),
+so Gatekeeper warns on the first launch:
+
+- **Right-click the app → Open**, then confirm; or
+- clear the quarantine flag once:
+
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/Code Canvas.app"
+  ```
+
+Each release ships checksums, so you can verify a download first:
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt
+```
+
+---
+
+## Build from source
 
 ```bash
 # 1. Install dependencies
@@ -87,16 +110,17 @@ npm run dev
 | `npm run build` | Compile main, preload, and renderer into `out/` |
 | `npm run rebuild` | Rebuild node-pty for Electron |
 | `npm run icon` | Regenerate `build/icon.icns` from the rendered SVG |
+| `npm run dmg:art` | Re-render the `.dmg` window artwork at 1x and 2x |
 | `npm run pack` | Unpacked `.app` in `release/` — quick packaging smoke test |
 | `npm run dist` | Build the distributable **`.dmg`** into `release/` |
+| `npm run checksums` | Write `release/SHA256SUMS.txt` for the built artifacts |
 
-After `npm run dist` you'll find the installer at:
+After `npm run dist` you'll find the installer and its checksums at:
 
 ```
-release/Code Canvas-0.2.0-arm64.dmg
+release/Code Canvas-<version>-arm64.dmg
+release/SHA256SUMS.txt
 ```
-
-> The `.dmg` is **not code-signed** (no Apple Developer certificate is configured), so on another Mac Gatekeeper will warn on first open — right-click → **Open**, or `xattr -dr com.apple.quarantine "/Applications/Code Canvas.app"`.
 
 ---
 
@@ -127,12 +151,16 @@ release/Code Canvas-0.2.0-arm64.dmg
 
 ```
 code-canvas/
-├── build/                    # app icon (icon.png master → icon.icns)
+├── build/                    # icon.png master → icon.icns, plus .dmg window art
 ├── scripts/
 │   ├── render-icon.cjs       # rasterises the SVG icon via Electron
-│   └── make-icns.sh          # PNG → .icns via sips + iconutil
+│   ├── make-icns.sh          # PNG → .icns via sips + iconutil
+│   ├── render-dmg-background.cjs  # .dmg window artwork (1x + 2x)
+│   ├── sync-excalidraw-assets.cjs # self-hosts Excalidraw fonts/locales
+│   └── checksums.cjs         # SHA-256 for the built artifacts
 ├── electron-builder.yml      # .dmg packaging config
 ├── electron.vite.config.mjs
+├── CHANGELOG.md
 └── src/
     ├── main/index.js         # window + vibrancy, FS/IPC, toolchain resolver, PTY, menu
     ├── preload/index.js      # window.api bridge (contextIsolated)
@@ -194,9 +222,12 @@ code-canvas/
 - [x] **Phase D** — terminal controls, run banner, `⌘↵`/`⌘S`, tab and Explorer polish.
 - [x] **Phase E** — drawing polish: clear, snapshot / PNG / SVG export, "has sketch" indicator.
 - [x] **Phase F** — native menu, welcome screen with recent projects, `.dmg` packaging, docs.
+- [x] **Release 1.0.0** — `.dmg` window artwork, `CHANGELOG.md`, release checksums, install docs.
 - [ ] Link a shape to a line number; step-through presentation mode; a shared pointer for teaching.
 - [ ] Auto-generated visuals — turn output into sticky notes, diagram a program's flow.
 - [ ] Windows and Linux builds; notarised, signed macOS release.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the release history.
 
 ---
 

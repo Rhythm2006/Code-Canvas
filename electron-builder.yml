@@ -41,10 +41,18 @@ mac:
 
 dmg:
   title: Code Canvas
+  # Rendered by `npm run dmg:art`. electron-builder finds the @2x sibling and
+  # hands both to `tiffutil -cathidpicheck`, so the window art is retina-crisp.
+  # The coordinates below are what that artwork's arrow points between.
+  background: build/dmg-background.png
+  window:
+    width: 540
+    height: 380
+  iconSize: 104
   contents:
-    - x: 140
-      y: 200
-    - x: 420
-      y: 200
+    - x: 145
+      y: 190
+    - x: 395
+      y: 190
       type: link
       path: /Applications

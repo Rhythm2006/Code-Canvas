@@ -1,7 +1,7 @@
 {
   "name": "code-canvas",
   "private": true,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "productName": "Code Canvas",
   "author": "Rhythm Sanjeev",
   "description": "A desktop code editor with a draw-on-code canvas — multi-file projects and runs any language",
@@ -15,6 +15,8 @@
     "preview": "electron-vite preview",
     "rebuild": "electron-rebuild -f -w node-pty",
     "icon": "electron scripts/render-icon.cjs && bash scripts/make-icns.sh",
+    "dmg:art": "electron scripts/render-dmg-background.cjs --scale=1 && electron scripts/render-dmg-background.cjs --scale=2",
+    "checksums": "node scripts/checksums.cjs",
     "pack": "npm run build && electron-builder --mac --dir",
     "dist": "npm run build && electron-builder --mac"
   },
