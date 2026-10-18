@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "productName": "Code Canvas",
   "author": "Rhythm Sanjeev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rhythm2006/Code-Canvas.git"
+  },
   "description": "A desktop code editor with a draw-on-code canvas — multi-file projects and runs any language",
   "main": "./out/main/index.js",
   "scripts": {
