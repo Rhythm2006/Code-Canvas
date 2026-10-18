@@ -233,6 +233,6 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the release history.
 
 ## License
 
-Project license: choose one and add a `LICENSE` file (MIT and Apache-2.0 are both common for a project like this). Until then, all rights reserved by the author.
+[MIT](LICENSE) © Rhythm Sanjeev. You're free to use, modify, and distribute Code Canvas, including commercially — just keep the copyright notice. It comes with no warranty.
 
 The drawing engine, [Excalidraw](https://github.com/excalidraw/excalidraw), is MIT-licensed — so the app needs **no license key, no trial, and shows no watermark**. Its drawing fonts are shipped unmodified with the package under their own upstream licenses.

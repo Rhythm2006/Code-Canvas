@@ -73,6 +73,7 @@ directly over the code.
 
 ### Notes
 
+- Released under the [MIT license](LICENSE).
 - Not code-signed, so the first launch on another Mac needs a Gatekeeper
   override (right-click → **Open**).
 - Drawings are viewport-anchored: they don't scroll with the code, so long
